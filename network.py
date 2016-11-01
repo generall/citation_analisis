@@ -15,7 +15,7 @@ import itertools
 import random
 import statistics
 
-class CoathorNetwork:
+class CoauthorNetwork:
     def __init__(self):
         self.articles = []
         self.author_to_article = {}
