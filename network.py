@@ -1,4 +1,5 @@
 from pygraph.classes.graph import graph
+from pygraph.classes.digraph import digraph
 from pygraph.readwrite import dot
 from pygraph.algorithms.minmax import shortest_path
 from pygraph.algorithms.accessibility import connected_components
@@ -19,12 +20,13 @@ class CoathorNetwork:
         self.articles = []
         self.author_to_article = {}
         self.gr = graph()
+        self.cgr = digraph()
         
-    def add_article(self, atricle):
+    def add_article(self, article):
         idx = len(self.articles)
-        self.articles.append(atricle)
+        self.articles.append(article)
         # Lookup table for each author
-        for author in atricle.authors:
+        for author in article.authors:
             author = author.strip()
             articles_of_author = self.author_to_article.get(author, [])
             articles_of_author.append(idx)
@@ -33,9 +35,20 @@ class CoathorNetwork:
             if not self.gr.has_node(author):
                 self.gr.add_node(author)
         # Add authors to graph
-        for pair in itertools.combinations(atricle.authors, 2):
+        for pair in itertools.combinations(article.authors, 2):
             if not self.gr.has_edge(pair):
                 self.gr.add_edge(pair);
+
+        if not self.cgr.has_node(article.paper_index):
+            self.cgr.add_node(article.paper_index, [article.paper_title])
+        else:
+            self.cgr.add_node_attribute(article.paper_index, [article.paper_title])
+
+        for cite in article.references_ids:
+            if not self.cgr.has_node(cite):
+                self.cgr.add_node
+            self.cgr.add_edge((article.paper_index, cite))
+        # self.cgr.add_node()
     
     def get_articles_by_author(author):
         [self.articles[idx] for idx in author_to_article.get(author, [])]
