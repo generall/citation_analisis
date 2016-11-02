@@ -1,9 +1,9 @@
-from pygraph.classes.graph import graph
-from pygraph.classes.digraph import digraph
-from pygraph.readwrite import dot
-from pygraph.algorithms.minmax import shortest_path
-from pygraph.algorithms.accessibility import connected_components
-from pygraph.algorithms.pagerank import pagerank
+# from pygraph.classes.graph import graph
+# from pygraph.classes.digraph import digraph
+# from pygraph.readwrite import dot
+# from pygraph.algorithms.minmax import shortest_path
+# from pygraph.algorithms.accessibility import connected_components
+# from pygraph.algorithms.pagerank import pagerank
 
 
 import numpy as np
@@ -20,7 +20,7 @@ class CoauthorNetwork:
     def __init__(self):
         self.articles = []
         self.author_to_article = {}
-        self.gr = graph()
+        self.gr = nx.Graph()
         self.cgr = nx.DiGraph()
         
     def add_article(self, article):
@@ -33,13 +33,10 @@ class CoauthorNetwork:
             articles_of_author.append(idx)
             self.author_to_article[author] = articles_of_author
             # Add author to graph if not exists
-            if not self.gr.has_node(author):
-                self.gr.add_node(author)
+            self.gr.add_node(author)
         # Add authors to graph
         for pair in itertools.combinations(article.authors, 2):
-            if not self.gr.has_edge(pair):
-                self.gr.add_edge(pair);
-
+            self.gr.add_edge(pair[0], pair[1]);
 
         self.cgr.add_node(article.paper_index, title=article.paper_title)
 
