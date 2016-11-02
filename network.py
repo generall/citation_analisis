@@ -20,7 +20,6 @@ class CoauthorNetwork:
     def __init__(self):
         self.articles = {}
         self.author_to_article = {}
-        self.id_to_article
         self.gr = nx.Graph()
         self.cgr = nx.DiGraph()
         
