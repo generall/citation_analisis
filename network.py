@@ -10,6 +10,7 @@ import numpy as np
 import matplotlib.mlab as mlab
 import matplotlib.pyplot as plt
 import re
+import networkx as nx
 
 import itertools
 import random
@@ -20,7 +21,7 @@ class CoauthorNetwork:
         self.articles = []
         self.author_to_article = {}
         self.gr = graph()
-        self.cgr = digraph()
+        self.cgr = nx.DiGraph()
         
     def add_article(self, article):
         idx = len(self.articles)
@@ -39,15 +40,13 @@ class CoauthorNetwork:
             if not self.gr.has_edge(pair):
                 self.gr.add_edge(pair);
 
-        if not self.cgr.has_node(article.paper_index):
-            self.cgr.add_node(article.paper_index, [article.paper_title])
-        else:
-            self.cgr.add_node_attribute(article.paper_index, [article.paper_title])
+
+        self.cgr.add_node(article.paper_index, title=article.paper_title)
 
         for cite in article.references_ids:
             if not self.cgr.has_node(cite):
                 self.cgr.add_node
-            self.cgr.add_edge((article.paper_index, cite))
+            self.cgr.add_edge(article.paper_index, cite)
         # self.cgr.add_node()
     
     def get_articles_by_author(author):
@@ -66,5 +65,5 @@ class Article:
         self.journal = journal
         self.paper_index = paper_index
         self.abstract = abstract
-        self.cite = references_ids          
+        self.references_ids = references_ids          
     
