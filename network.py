@@ -18,19 +18,20 @@ import statistics
 
 class CoauthorNetwork:
     def __init__(self):
-        self.articles = []
+        self.articles = {}
         self.author_to_article = {}
+        self.id_to_article
         self.gr = nx.Graph()
         self.cgr = nx.DiGraph()
         
     def add_article(self, article):
-        idx = len(self.articles)
-        self.articles.append(article)
+        article_id = article.paper_index
+        self.articles[article_id] = article
         # Lookup table for each author
         for author in article.authors:
             author = author.strip()
             articles_of_author = self.author_to_article.get(author, [])
-            articles_of_author.append(idx)
+            articles_of_author.append(article_id)
             self.author_to_article[author] = articles_of_author
             # Add author to graph if not exists
             self.gr.add_node(author)
@@ -38,21 +39,36 @@ class CoauthorNetwork:
         for pair in itertools.combinations(article.authors, 2):
             self.gr.add_edge(pair[0], pair[1]);
 
-        self.cgr.add_node(article.paper_index, title=article.paper_title)
+        # self.cgr.add_node(article.paper_index, title=article.paper_title)
 
-        for cite in article.references_ids:
-            if not self.cgr.has_node(cite):
-                self.cgr.add_node(cite)
-            self.cgr.add_edge(article.paper_index, cite)
+        # for cite in article.references_ids:
+        #     if not self.cgr.has_node(cite):
+        #         self.cgr.add_node(cite)
+        #     self.cgr.add_edge(article.paper_index, cite)
         # self.cgr.add_node()
     
     def get_articles_by_author(author):
-        [self.articles[idx] for idx in author_to_article.get(author, [])]
+        [self.articles.get(idx) for idx in author_to_article.get(author, [])]
     
     def write_dot(filename):
         f = open(filename, 'w')
         f.write(dot.write(self.gr))
         f.close()
+
+    def create_cite_graph(self):
+        for article_id, article in articles.items():
+            #add all author of current article nodes
+            for author in article.authors:
+                author = author.strip()
+                self.cgr.add_node(author)                
+            for cited_article in article.references_ids:
+                for cited_author in articles.get(cited_article).authors or []:
+                    cited_author = cited_author.strip()                    
+                    self.cgr.add_node(cited_author) 
+                    self.cgr.add_edge(author, cited_author)
+
+
+
 
 class Article:
     def __init__(self, paper_title, authors, year, journal, paper_index, abstract, references_ids):
