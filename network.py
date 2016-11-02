@@ -45,7 +45,7 @@ class CoauthorNetwork:
 
         for cite in article.references_ids:
             if not self.cgr.has_node(cite):
-                self.cgr.add_node
+                self.cgr.add_node(cite)
             self.cgr.add_edge(article.paper_index, cite)
         # self.cgr.add_node()
     
