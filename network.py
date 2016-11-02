@@ -57,7 +57,7 @@ class CoauthorNetwork:
 class Article:
     def __init__(self, paper_title, authors, year, journal, paper_index, abstract, references_ids):
         self.paper_title = paper_title
-        self.authors = [x.strip() for x in authors]       
+        self.authors = [x.strip() for x in authors if len(x.strip()) > 3]       
         self.year = int(year)    
         self.journal = journal
         self.paper_index = paper_index
