@@ -17,11 +17,28 @@ from loaders import *
 from graph_tools import *
 
 
-def plot_dict(stat, xlbl, ylbl):
-    plt.plot([x for x in stat.keys()], [x for x in stat.values()])
-    plt.xlabel(xlbl)
-    plt.ylabel(ylbl)
-    plt.show()
+def plot_dict(stat, xlbl, ylbl, doGaussianFit=False):
+    if doGaussianFit:
+
+        data = [x for x in stat.values()]
+        plt.plot([x for x in stat.keys()], data, '-')
+
+        X = np.arange(len(data))
+        x = np.sum(X*data)/np.sum(data)
+        width = np.sqrt(np.abs(np.sum((X-x)**2*data)/np.sum(data)))
+
+        max_data = max(data)
+
+        fit = lambda t : max_data*np.exp(-(t-x)**2/(2*width**2))
+
+        plt.plot([x for x in stat.keys()], fit(X), '-')
+        plt.xlabel(xlbl)
+        plt.ylabel(ylbl)
+    else:
+        plt.plot([x for x in stat.keys()], [x for x in stat.values()])
+        plt.xlabel(xlbl)
+        plt.ylabel(ylbl)
+        plt.show()
 
 def plot_list(stat, xlbl, ylbl):
     plt.plot(stat)
@@ -135,6 +152,13 @@ class CoauthorNetwork:
     def analize_component(self):
         the_component = self.components[0]
         self.component_subgraph = self.gr.subgraph(the_component)
+
+    def gaussian_fit(self):
+        gaussian = lambda x: 3*np.exp(-(30-x)**2/20.)
+
+        data = gaussian(np.arange(100))
+
+        
         
 
 
@@ -154,13 +178,13 @@ class CoauthorNetwork:
         print("Mean distance:", sum([value * key for key, value in stat.items()]))
         print(" ")
         print("Distance distribution")
-        plot_dict(stat, "rank", "density")
+        plot_dict(stat, "rank", "density", doGaussianFit=True)
         
-        cstat = get_centrality_stat(self.component_subgraph)
+        # cstat = get_centrality_stat(self.component_subgraph)
         
-        plot_list(cstat[0], "rank", "log node degree centrality")
-        plot_list(cstat[1], "rank", "log node betweenness centrality")
-        plot_list(cstat[2], "rank", "log node closeness centrality")
+        # plot_list(cstat[0], "rank", "log node degree centrality")
+        # plot_list(cstat[1], "rank", "log node betweenness centrality")
+        # plot_list(cstat[2], "rank", "log node closeness centrality")
 
     def calc_coauthor_cite_distribution(self):
         coauthor_distribution = {}
