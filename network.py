@@ -60,10 +60,12 @@ class CoauthorNetwork:
     def get_articles_by_author(author):
         [self.articles.get(idx) for idx in author_to_article.get(author, [])]
     
-    def write_dot(filename):
-        f = open(filename, 'w')
-        f.write(dot.write(self.gr))
-        f.close()
+    def write_gml_gr(self,filename):
+        nx.set_edge_attributes(self.gr, 'year', self.coauth_year)
+        nx.set_edge_attributes(self.gr, 'times', self.coauth_count)
+        nx.write_gml(self.gr, filename)
+
+
 
     def create_cite_graph(self):
         for article_id, article in self.articles.items():
