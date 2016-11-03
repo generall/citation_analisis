@@ -1,5 +1,3 @@
-from collections import Counter
-
 import numpy as np
 import matplotlib.mlab as mlab
 import matplotlib.pyplot as plt
@@ -39,7 +37,9 @@ class CoauthorNetwork:
         self.coauth_count = {}
         self.coauth_year = {}
         self.author_year = {}
-        self.auth_cited_by_year = {}
+	self.auth_cited_by_year = {}
+        self.cite_year = {}
+        self.cite_count = {}
         
     def add_article(self, article):
         article_id = article.paper_index
@@ -58,14 +58,22 @@ class CoauthorNetwork:
             self.coauth_count[pair] = self.coauth_count.get(pair, 0) + 1
             self.coauth_year[pair] = self.coauth_year.get(pair, []) + [article.year]
             self.gr.add_edge(pair[0], pair[1])
+
     
     def get_articles_by_author(author):
         [self.articles.get(idx) for idx in author_to_article.get(author, [])]
     
-    def write_dot(filename):
-        f = open(filename, 'w')
-        f.write(dot.write(self.gr))
-        f.close()
+    def write_gml_gr(self,filename):
+        nx.set_edge_attributes(self.gr, 'year', self.coauth_year)
+        nx.set_edge_attributes(self.gr, 'times', self.coauth_count)
+        nx.write_gml(self.gr, filename)
+
+    def write_gml_cgr(self, filename):
+        nx.set_edge_attributes(self.cgr, 'year', self.cite_year)
+        nx.set_edge_attributes(self.cgr, 'times', self.cite_count)
+        nx.write_gml(self.cgr, filename)
+
+
 
     def create_cite_graph(self):
         for article_id, article in self.articles.items():
@@ -79,6 +87,8 @@ class CoauthorNetwork:
                     for cited_author in cited_article.authors:
                         cited_author = cited_author.strip()                    
                         self.cgr.add_node(cited_author) 
+                        self.cite_year[(author, cited_author)] = self.cite_year.get((author, cited_author), []) + [article.year]
+                        self.cite_count[(author, cited_author)] = self.cite_count.get((author, cited_author), 0) + 1
                         self.cgr.add_edge(author, cited_author)
                         pair = (cited_author, author)
                         # self.auth_cited_by_year[pair] = self.auth_cited_by_year.get(pair, []) + [article.year]
