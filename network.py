@@ -37,7 +37,7 @@ class CoauthorNetwork:
         self.coauth_count = {}
         self.coauth_year = {}
         self.author_year = {}
-	self.auth_cited_by_year = {}
+        self.auth_cited_by_year = {}
         self.cite_year = {}
         self.cite_count = {}
         
