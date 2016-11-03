@@ -3,7 +3,7 @@ import matplotlib.mlab as mlab
 import matplotlib.pyplot as plt
 import networkx as nx
 from scipy.stats import power_divergence
-
+from collections import Counter
 
 import re
 import itertools
@@ -93,9 +93,9 @@ class CoauthorNetwork:
                         pair = (cited_author, author)
                         # self.auth_cited_by_year[pair] = self.auth_cited_by_year.get(pair, []) + [article.year]
 
-                        year_number_dict =  self.auth_cited_by_year.get(author, {})
+                        year_number_dict =  self.auth_cited_by_year.get(cited_author, {})
                         year_number_dict[article.year] = year_number_dict.get(article.year, 0) + 1
-                        self.auth_cited_by_year[author] = year_number_dict
+                        self.auth_cited_by_year[cited_author] = year_number_dict
 
 
 
@@ -144,7 +144,7 @@ class CoauthorNetwork:
         print("Distance distribution")
         plot_dict(stat, "rank", "density")
         
-        cstat = get_centrality_stat(self.cgr)
+        cstat = get_centrality_stat(self.component_subgraph)
         
         plot_list(cstat[0], "rank", "log node degree centrality")
         plot_list(cstat[1], "rank", "log node betweenness centrality")
@@ -173,11 +173,15 @@ class CoauthorNetwork:
         author_year_cites_num = {}
             
         auth_coauth_pagerank = calc_pagerank(self.gr, 10)[2]
+        auth_cite_pagerank = calc_pagerank(self.cgr, 10)[2]
 
-        author_year_coauthors_num = dict( (author, Counter(years) ) for author, years in self.author_year.items() )
+        author_year_coauthors_num = dict( (author, dict(Counter(years)) ) for author, years in self.author_year.items() )
 
-        return [author_year_coauthors_num.get(author, {}) for author, weight in auth_coauth_pagerank ]
+        topCoauthors = [author_year_coauthors_num.get(author, {}) for author, weight in auth_coauth_pagerank ]
 
+        topCited = [self.auth_cited_by_year.get(author, {}) for author, weight in auth_cite_pagerank ]
+
+        return (topCoauthors, topCited)
 
 
         # filtered_year_coauth = [for author, years_dict in author_year_coauthors_num.items()]
