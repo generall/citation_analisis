@@ -136,9 +136,10 @@ class CoauthorNetwork:
             coauthor_distribution[len(article.authors)] = coauthor_distribution.get(len(article.authors), 0) + 1
 
         for cite_node in self.cgr.nodes():
-            in_nodes = self.cgr.in_edges(cite_node)
             if len(in_nodes) != 0:
-                cite_distribution[len(in_nodes[0])] = cite_distribution.get(len(in_nodes[0]), 0) + 1
+                cite_distribution[self.cgr.in_degree(cite_node)] = cite_distribution.get(self.cgr.in_degree(cite_node)), 0) + 1
+            else:
+                cite_distribution[0] = cite_distribution.get(0, 0) + 1
 
         coauthor_distribution = sorted(coauthor_distribution.items(), key=operator.itemgetter(0))
         cite_distribution = sorted(cite_distribution.items(), key=operator.itemgetter(0))
