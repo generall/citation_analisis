@@ -69,6 +69,6 @@ def calc_pagerank(graph, TOP=50):
     node_ranks = dict( (val, idx) for idx, val in enumerate(sorted_nodes))
 #     print(sorted_nodes[0:TOP])
     top_subgraph = graph.subgraph([x[0] for x in sorted_nodes[0:TOP]])
-    return (top_subgraph, weighted_nodes, sorted_nodes)
+    return (top_subgraph, weighted_nodes, sorted_nodes[:TOP])
 
 
