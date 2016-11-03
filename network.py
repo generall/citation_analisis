@@ -49,16 +49,17 @@ class CoauthorNetwork:
         f.close()
 
     def create_cite_graph(self):
-        for article_id, article in articles.items():
+        for article_id, article in self.articles.items():
             #add all author of current article nodes
             for author in article.authors:
                 author = author.strip()
                 self.cgr.add_node(author)                
             for cited_article in article.references_ids:
-                for cited_author in articles.get(cited_article).authors or []:
-                    cited_author = cited_author.strip()                    
-                    self.cgr.add_node(cited_author) 
-                    self.cgr.add_edge(author, cited_author)
+                if self.articles.get(cited_article) != None:
+                    for cited_author in self.articles.get(cited_article).authors:
+                        cited_author = cited_author.strip()                    
+                        self.cgr.add_node(cited_author) 
+                        self.cgr.add_edge(author, cited_author)
 
 
     def load_with_loader(file, loader, article_filter = None):
