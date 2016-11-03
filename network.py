@@ -1,11 +1,3 @@
-# from pygraph.classes.graph import graph
-# from pygraph.classes.digraph import digraph
-# from pygraph.readwrite import dot
-# from pygraph.algorithms.minmax import shortest_path
-# from pygraph.algorithms.accessibility import connected_components
-# from pygraph.algorithms.pagerank import pagerank
-
-
 import numpy as np
 import matplotlib.mlab as mlab
 import matplotlib.pyplot as plt
@@ -15,6 +7,8 @@ import networkx as nx
 import itertools
 import random
 import statistics
+
+from loaders import *
 
 class CoauthorNetwork:
     def __init__(self):
@@ -65,6 +59,18 @@ class CoauthorNetwork:
                     cited_author = cited_author.strip()                    
                     self.cgr.add_node(cited_author) 
                     self.cgr.add_edge(author, cited_author)
+
+
+    def load_with_loader(file, loader, article_filter = None):
+        coauthorNetwork = CoauthorNetwork()
+        if article_filter == None:
+            article_filter = lambda x: True
+        for article in loader(file):
+            if article_filter(article):
+                coauthorNetwork.add_article(article)
+
+        print("Uniq authors:", len([x for x in coauthorNetwork.author_to_article.keys()]))
+        return coauthorNetwork
 
 
 
