@@ -134,7 +134,7 @@ class CoauthorNetwork:
         print("Distance distribution")
         plot_dict(stat, "rank", "density")
         
-        cstat = get_centrality_stat(self.cgr)
+        cstat = get_centrality_stat(self.component_subgraph)
         
         plot_list(cstat[0], "rank", "log node degree centrality")
         plot_list(cstat[1], "rank", "log node betweenness centrality")
