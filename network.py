@@ -37,6 +37,8 @@ class CoauthorNetwork:
         self.coauth_count = {}
         self.coauth_year = {}
         self.author_year = {}
+        self.cite_year = {}
+        self.cite_count = {}
         
     def add_article(self, article):
         article_id = article.paper_index
@@ -65,6 +67,11 @@ class CoauthorNetwork:
         nx.set_edge_attributes(self.gr, 'times', self.coauth_count)
         nx.write_gml(self.gr, filename)
 
+    def write_gml_cgr(self, filename):
+        nx.set_edge_attributes(self.cgr, 'year', self.cite_year)
+        nx.set_edge_attributes(self.cgr, 'times', self.cite_count)
+        nx.write_gml(self.cgr, filename)
+
 
 
     def create_cite_graph(self):
@@ -78,6 +85,8 @@ class CoauthorNetwork:
                     for cited_author in self.articles.get(cited_article).authors:
                         cited_author = cited_author.strip()                    
                         self.cgr.add_node(cited_author) 
+                        self.cite_year[(author, cited_author)] = self.cite_year.get((author, cited_author), []) + [article.year]
+                        self.cite_count[(author, cited_author)] = self.cite_count.get((author, cited_author), 0) + 1
                         self.cgr.add_edge(author, cited_author)
 
 
