@@ -1,14 +1,32 @@
 import numpy as np
 import matplotlib.mlab as mlab
 import matplotlib.pyplot as plt
-import re
 import networkx as nx
+from scipy.stats import power_divergence
 
+
+import re
 import itertools
 import random
 import statistics
+import operator
+import math
 
 from loaders import *
+from graph_tools import *
+
+
+def plot_dict(stat, xlbl, ylbl):
+    plt.plot([x for x in stat.keys()], [x for x in stat.values()])
+    plt.xlabel(xlbl)
+    plt.ylabel(ylbl)
+    plt.show()
+
+def plot_list(stat, xlbl, ylbl):
+    plt.plot(stat)
+    plt.xlabel(xlbl)
+    plt.ylabel(ylbl)
+    plt.show()
 
 class CoauthorNetwork:
     def __init__(self):
@@ -16,6 +34,8 @@ class CoauthorNetwork:
         self.author_to_article = {}
         self.gr = nx.Graph()
         self.cgr = nx.DiGraph()
+        self.coauth_count = {}
+        self.coauth_year = {}
         
     def add_article(self, article):
         article_id = article.paper_index
@@ -30,15 +50,10 @@ class CoauthorNetwork:
             self.gr.add_node(author)
         # Add authors to graph
         for pair in itertools.combinations(article.authors, 2):
-            self.gr.add_edge(pair[0], pair[1]);
+            self.coauth_count[pair] = self.coauth_count.get(pair, 0) + 1
+            self.coauth_year[pair] = self.coauth_year.get(pair, []) + [article.year]
+            self.gr.add_edge(pair[0], pair[1])
 
-        # self.cgr.add_node(article.paper_index, title=article.paper_title)
-
-        # for cite in article.references_ids:
-        #     if not self.cgr.has_node(cite):
-        #         self.cgr.add_node(cite)
-        #     self.cgr.add_edge(article.paper_index, cite)
-        # self.cgr.add_node()
     
     def get_articles_by_author(author):
         [self.articles.get(idx) for idx in author_to_article.get(author, [])]
@@ -69,20 +84,45 @@ class CoauthorNetwork:
         for article in loader(file):
             if article_filter(article):
                 coauthorNetwork.add_article(article)
+        coauthorNetwork.create_cite_graph()
 
         print("Uniq authors:", len([x for x in coauthorNetwork.author_to_article.keys()]))
         return coauthorNetwork
-
-
-
-
-class Article:
-    def __init__(self, paper_title, authors, year, journal, paper_index, abstract, references_ids):
-        self.paper_title = paper_title
-        self.authors = [x.strip() for x in authors if len(x.strip()) > 3]       
-        self.year = int(year)    
-        self.journal = journal
-        self.paper_index = paper_index
-        self.abstract = abstract
-        self.references_ids = references_ids          
     
+
+    def gen_components(self):
+        self.components = [c for c in sorted(nx.connected_components(self.gr), key=len, reverse=True)]
+        self.components_sizes = dict((idx, math.log(float(len(c)))) for idx, c in enumerate(self.components))
+        self.component_count = len(self.components)
+
+
+
+    def analize_component(self):
+        the_component = self.components[0]
+        self.component_subgraph = self.gr.subgraph(the_component)
+        
+
+
+    def print_info_component(self):
+        PRECISION = 50 # number of authors to calc avg distance
+        print(" ")
+        print("Connected component distribution (log-scale)")
+        plot_dict(self.components_sizes, "rank", "size(log)")
+
+        print(power_divergence([len(c) for c in self.components]))
+        print("Connected component count:", self.component_count)
+
+        print("----------")
+        print("Authors count:",len(self.component_subgraph.nodes()))
+        stat = get_distance_stat(self.component_subgraph, PRECISION)
+        
+        print("Mean distance:", sum([value * key for key, value in stat.items()]))
+        print(" ")
+        print("Distance distribution")
+        plot_dict(stat, "rank", "density")
+        
+        cstat = get_centrality_stat(self.cgr)
+        sorted_cstat = sorted(cstat, reverse=True)
+        plot_list(sorted_cstat, "rank", "log node centrality")
+        
+

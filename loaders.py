@@ -1,6 +1,17 @@
 import re
 from network import *
 
+class Article:
+    def __init__(self, paper_title, authors, year, journal, paper_index, abstract, references_ids):
+        self.paper_title = paper_title
+        self.authors = [x.strip() for x in authors if len(x.strip()) > 3]       
+        self.year = int(year)    
+        self.journal = journal
+        self.paper_index = paper_index
+        self.abstract = abstract
+        self.references_ids = references_ids          
+    
+
 
 def parse_dataset_file(filename):
     paper_title_regexp = re.compile('#\*(.*)\n')
