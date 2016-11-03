@@ -122,7 +122,8 @@ class CoauthorNetwork:
         plot_dict(stat, "rank", "density")
         
         cstat = get_centrality_stat(self.cgr)
-        sorted_cstat = sorted(cstat, reverse=True)
-        plot_list(sorted_cstat, "rank", "log node centrality")
         
+        plot_list(cstat[0], "rank", "log node degree centrality")
+        plot_list(cstat[1], "rank", "log node betweenness centrality")
+        plot_list(cstat[2], "rank", "log node closeness centrality")
 

@@ -1,4 +1,5 @@
 import random
+import operator
 
 import networkx as nx
 import math
@@ -30,19 +31,35 @@ def get_distance_stat(graph, n):
 #calculate centrality statistics
 def get_centrality_stat(graph):
     N = len(graph.nodes())
-    centrality_stat = nx.degree_centrality(graph)
-    print("----------")
-    print("Average degree node centrality:", sum(centrality_stat.values())/len(centrality_stat) )
+    degree_centrality_full_stat = nx.degree_centrality(graph)
+    betweenness_centrality_full_stat = nx.betweenness_centrality(graph, 10000)
+    closeness_centrality_full_stat = nx.closeness_centrality(graph)
+
+    sorted_degree_centrality_stat = sorted(degree_centrality_full_stat.items(), key=operator.itemgetter(1), reverse=True)[:10]
+    sorted_betweenness_centrality_stat = sorted(betweenness_centrality_full_stat.items(), key=operator.itemgetter(1), reverse=True)[:10]
+    sorted_closeness_centrality_stat = sorted(closeness_centrality_full_stat.items(), key=operator.itemgetter(1), reverse=True)[:10]
+
+    top_degree_authors = sorted_degree_centrality_stat[:10]
+    top_betweenness_authors = sorted_betweenness_centrality_stat[:10]
+    top_closeness_authors = sorted_closeness_centrality_stat[:10]
+
+    print("Top 10 authors by degree centrality measurement:", top_degree_authors)
+    print("Top 10 authors by betweenness centrality measurement:", top_betweenness_authors)
+    print("Top 10 authors by closeness centrality measurement:", top_closeness_authors)
+    # print("----------")
+    # print("Average degree node centrality:", sum(centrality_stat.values())/len(centrality_stat) )
     
-    max_centrality = max(centrality_stat.values())
-    print("Maxumum degree node centrality:", max_centrality)
+    # max_centrality = max(centrality_stat.values())
+    # print("Maxumum degree node centrality:", max_centrality)
     
-    nodes_num = len(graph.nodes())
-    print("Degree graph centrality:", 
-          sum([max_centrality - x for x in centrality_stat.values()])/((nodes_num - 1)*(nodes_num - 2)))
+    # nodes_num = len(graph.nodes())
+    # print("Degree graph centrality:", 
+    #       sum([max_centrality - x for x in centrality_stat.values()])/((nodes_num - 1)*(nodes_num - 2)))
     
-    print("----------")
-    return [math.log(value + 1) if value > 0 else 0 for i, value in centrality_stat.items()]
+    # print("----------")
+    return ([y for x,y in sorted_degree_centrality_stat], 
+            [y for x,y in sorted_betweenness_centrality_stat],
+            [y for x,y in sorted_closeness_centrality_stat])
 
 
 def calc_pagerank(graph):
