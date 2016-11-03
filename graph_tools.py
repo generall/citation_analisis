@@ -62,8 +62,7 @@ def get_centrality_stat(graph):
             [y for x,y in sorted_closeness_centrality_stat])
 
 
-def calc_pagerank(graph):
-    TOP = 50
+def calc_pagerank(graph, TOP=50):
     percent_threshold = 0.1
     weighted_nodes = nx.pagerank(graph)
     sorted_nodes = sorted(weighted_nodes.items(), key = lambda pair: pair[1], reverse=True)
