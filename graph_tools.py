@@ -32,7 +32,7 @@ def get_distance_stat(graph, n):
 def get_centrality_stat(graph):
     N = len(graph.nodes())
     degree_centrality_full_stat = nx.degree_centrality(graph)
-    betweenness_centrality_full_stat = nx.betweenness_centrality(graph, 10000)
+    betweenness_centrality_full_stat = nx.betweenness_centrality(graph, 100)
     closeness_centrality_full_stat = nx.closeness_centrality(graph)
 
     sorted_degree_centrality_stat = sorted(degree_centrality_full_stat.items(), key=operator.itemgetter(1), reverse=True)[:10]

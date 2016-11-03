@@ -127,3 +127,24 @@ class CoauthorNetwork:
         plot_list(cstat[1], "rank", "log node betweenness centrality")
         plot_list(cstat[2], "rank", "log node closeness centrality")
 
+    def calc_coauthor_cite_distribution(self):
+        coauthor_distribution = {}
+        cite_distribution = {}
+        for article_id, article in self.articles.items():
+            coauthor_distribution[len(article.authors)] = coauthor_distribution.get(len(article.authors), 0) + 1
+
+        for cite_node in self.cgr.nodes():
+            in_nodes = self.cgr.in_edges(cite_node)
+            if len(in_nodes) != 0:
+                cite_distribution[len(in_nodes[0])] = cite_distribution.get(len(in_nodes[0]), 0) + 1
+
+        coauthor_distribution = sorted(coauthor_distribution.items(), key=operator.itemgetter(0))
+        cite_distribution = sorted(cite_distribution.items(), key=operator.itemgetter(0))
+
+        print("coauth:", coauthor_distribution[:10])
+        print("cite:", cite_distribution[:10])
+        return (coauthor_distribution, cite_distribution)
+
+
+    
+
