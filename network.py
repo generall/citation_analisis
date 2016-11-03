@@ -36,6 +36,7 @@ class CoauthorNetwork:
         self.cgr = nx.DiGraph()
         self.coauth_count = {}
         self.coauth_year = {}
+        self.author_year = {}
         
     def add_article(self, article):
         article_id = article.paper_index
@@ -46,6 +47,7 @@ class CoauthorNetwork:
             articles_of_author = self.author_to_article.get(author, [])
             articles_of_author.append(article_id)
             self.author_to_article[author] = articles_of_author
+            self.author_year[author] = self.author_year.get(author, []) + [article.year]
             # Add author to graph if not exists
             self.gr.add_node(author)
         # Add authors to graph
