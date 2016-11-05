@@ -1,4 +1,4 @@
-# citation_analisis
+# citation_analysis
 iPython notebooks and tools citation and co-authorship analysis
 
 
