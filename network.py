@@ -14,6 +14,7 @@ import math
 
 from loaders import *
 from graph_tools import *
+from plot_n_fit import *
 
 
 import numpy as np
@@ -21,55 +22,9 @@ from numpy import pi, r_
 import matplotlib.pyplot as plt
 from scipy import optimize
 
-def fit_power_law(xdata, ydata, log=False):
-    powerlaw = lambda x, amp, index: amp * (x**index)
-    fitfunc = lambda p, x: p[0] + p[1] * x
-    errfunc = lambda p, x, y: (y - fitfunc(p, x))
-    logx = np.log10([x + 1 for x in xdata])
-    logy = np.log10([y + 1 for y in ydata])
-    pinit = [1.0, -1.0]
-    out = optimize.leastsq(errfunc, pinit,
-                       args=(logx, logy), full_output=1)
-    pfinal = out[0]
-    covar = out[1]
-    print("pfinal:", pfinal)
-    print("covar:", covar)
-    index = pfinal[1]
-    amp = 10.0**pfinal[0]
-    indexErr = np.sqrt( covar[0][0] )
-    ampErr = np.sqrt( covar[1][1] ) * amp
-    if log:
-        plt.semilogy(xdata, powerlaw(xdata, amp, index))
-    else:
-        plt.plot(xdata, powerlaw(xdata, amp, index))
-    
-    print('Ampli = %5.2f +/- %5.2f' % (amp, ampErr))
-    print('Index = %5.2f +/- %5.2f' % (index, indexErr))
 
-def plot_dict(stat, xlbl, ylbl, doFit=False):
-    xdata = [x for x in stat.keys()]
-    ydata = [x for x in stat.values()]
 
-    if doFit:
-        fit_power_law(xdata,ydata)
 
-    plt.plot(xdata, ydata)
-    plt.xlabel(xlbl)
-    plt.ylabel(ylbl)
-    plt.show()
-
-def plot_list(stat, xlbl, ylbl, doFit=False):
-    xdata = [idx for idx, x in enumerate(stat)]
-    ydata = [x for x in stat]
-    
-    if doFit:
-        fit_power_law(xdata,ydata)
-    plt.plot(xdata, ydata)
-
-    plt.plot(stat)
-    plt.xlabel(xlbl)
-    plt.ylabel(ylbl)
-    plt.show()
 
 class CoauthorNetwork:
     def __init__(self):
@@ -171,9 +126,10 @@ class CoauthorNetwork:
 
     def print_info_component(self):
         PRECISION = 50 # number of authors to calc avg distance
-        print(" ")
-        print("Connected component distribution (log-scale)")
-        plot_dict(self.components_sizes, "rank", "size(log)", doFit = True)
+        r = sorted(self.components_sizes.values(), reverse=True)
+
+        plot_labels("Component rank", "Number of authors(log)", "Components size distribution")
+        plot_rank(r, plot_xy_line, doFit=True)
 
         print(power_divergence([len(c) for c in self.components]))
         print("Connected component count:", self.component_count)
@@ -183,15 +139,17 @@ class CoauthorNetwork:
         stat = get_distance_stat(self.component_subgraph, PRECISION)
         
         print("Mean distance:", sum([value * key for key, value in stat.items()]))
-        print(" ")
-        print("Distance distribution")
-        plot_dict(stat, "rank", "density")
+        plot_labels("Distance", "Probability", "Distance distribution")
+        plot_pairs(stat.items(), plot_xy_line)
         
         cstat = get_centrality_stat(self.component_subgraph)
         
-        plot_list(cstat[0], "rank", "log node degree centrality", doFit=False)
-        plot_list(cstat[1], "rank", "log node betweenness centrality", doFit=False)
-        plot_list(cstat[2], "rank", "log node closeness centrality", doFit=False)
+        plot_labels("Rank", "Log node degree centrality", "Degree centrality")
+        plot_rank(cstat[0], plot_xy_line)
+        plot_labels("Rank", "Log node betweenness centrality", "Betweenness centrality")
+        plot_rank(cstat[1], plot_xy_line)
+        plot_labels("Rank", "Log node closeness centrality", "Closeness centrality")
+        plot_rank(cstat[2], plot_xy_line)
 
     def calc_coauthor_cite_distribution(self):
         coauthor_distribution = {}
