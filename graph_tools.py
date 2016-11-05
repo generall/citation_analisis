@@ -43,9 +43,15 @@ def get_centrality_stat(graph):
     top_betweenness_authors = sorted_betweenness_centrality_stat[:10]
     top_closeness_authors = sorted_closeness_centrality_stat[:10]
 
-    print("Top 10 authors by degree centrality measurement:", top_degree_authors)
-    print("Top 10 authors by betweenness centrality measurement:", top_betweenness_authors)
-    print("Top 10 authors by closeness centrality measurement:", top_closeness_authors)
+    print("Top 10 authors by degree centrality measurement:")
+    for x in top_degree_authors:
+        print(x)
+    print("Top 10 authors by betweenness centrality measurement:")
+    for x in top_betweenness_authors:
+        print(x)
+    print("Top 10 authors by closeness centrality measurement:")
+    for x in top_closeness_authors:
+        print(x)
     # print("----------")
     # print("Average degree node centrality:", sum(centrality_stat.values())/len(centrality_stat) )
     

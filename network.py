@@ -4,6 +4,8 @@ import matplotlib.pyplot as plt
 import networkx as nx
 from scipy.stats import power_divergence
 from collections import Counter
+from numpy import pi, r_
+from scipy import optimize
 
 import re
 import itertools
@@ -15,15 +17,6 @@ import math
 from loaders import *
 from graph_tools import *
 from plot_n_fit import *
-
-
-import numpy as np
-from numpy import pi, r_
-import matplotlib.pyplot as plt
-from scipy import optimize
-
-
-
 
 
 class CoauthorNetwork:
@@ -128,7 +121,7 @@ class CoauthorNetwork:
         PRECISION = 50 # number of authors to calc avg distance
         r = sorted(self.components_sizes.values(), reverse=True)
 
-        plot_labels("Component rank", "Number of authors(log)", "Components size distribution")
+        plot_labels("Component rank", "Number of authors", "Components size distribution")
         plot_rank(r, plot_xy_line, doFit=True)
 
         print(power_divergence([len(c) for c in self.components]))
@@ -140,7 +133,7 @@ class CoauthorNetwork:
         
         print("Mean distance:", sum([value * key for key, value in stat.items()]))
         plot_labels("Distance", "Probability", "Distance distribution")
-        plot_pairs(stat.items(), plot_xy_line)
+        plot_with_gaussion_fit(stat.items())
         
         cstat = get_centrality_stat(self.component_subgraph)
         
@@ -183,30 +176,4 @@ class CoauthorNetwork:
         topCited = [self.auth_cited_by_year.get(author, {}) for author, weight in auth_cite_pagerank ]
 
         return (topCoauthors, topCited)
-
-
-        # filtered_year_coauth = [for author, years_dict in author_year_coauthors_num.items()]
-
-        # for author, weight in auth_coauth_pagerank:
-        #     for coauthor in self.gr.neighbors(author):
-        #         for year in self.coauth_year.get((author, coauthor), []):
-        #             year_number_dict = author_year_coauthors_num.get(author, {})
-        #             year_number_dict[year] = year_number_dict.get(year, 0) + 1
-        #             author_year_coauthors_num[author] = year_number_dict
-
-        # auth_cite_pagerank = calc_pagerank(self.cgr, 10)[2]
-        # for author, weight in auth_cite_pagerank:
-        #     for who_cited in self.cgr.in_edges(author):
-        #         for year in self.auth_cited_by_year.get((author, who_cited), []):
-        #             year_number_dict =  articles_cited_in_year.get(author, {})
-        #             year_number_dict[year] = year_number_dict.get(year, 0) + 1
-        #             author_year_cites_num[author] = year_number_dict
-
-        # return (author_year_coauthors_num, self.auth_cited_by_year)
-
-
-
-
-
-    
 
