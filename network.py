@@ -2,7 +2,6 @@ import numpy as np
 import matplotlib.mlab as mlab
 import matplotlib.pyplot as plt
 import networkx as nx
-from networkx.algorithms import bipartite
 from scipy.stats import power_divergence
 from collections import Counter
 
@@ -17,30 +16,56 @@ from loaders import *
 from graph_tools import *
 
 
-def plot_dict(stat, xlbl, ylbl, doGaussianFit=False):
-    if doGaussianFit:
+import numpy as np
+from numpy import pi, r_
+import matplotlib.pyplot as plt
+from scipy import optimize
 
-        data = [x for x in stat.values()]
-        plt.plot([x for x in stat.keys()], data, '-')
-
-        X = np.arange(len(data))
-        x = np.sum(X*data)/np.sum(data)
-        width = np.sqrt(np.abs(np.sum((X-x)**2*data)/np.sum(data)))
-
-        max_data = max(data)
-
-        fit = lambda t : max_data*np.exp(-(t-x)**2/(2*width**2))
-
-        plt.plot([x for x in stat.keys()], fit(X), '-')
-        plt.xlabel(xlbl)
-        plt.ylabel(ylbl)
+def fit_power_law(xdata, ydata, log=False):
+    powerlaw = lambda x, amp, index: amp * (x**index)
+    fitfunc = lambda p, x: p[0] + p[1] * x
+    errfunc = lambda p, x, y: (y - fitfunc(p, x))
+    logx = np.log10([x + 1 for x in xdata])
+    logy = np.log10([y + 1 for y in ydata])
+    pinit = [1.0, -1.0]
+    out = optimize.leastsq(errfunc, pinit,
+                       args=(logx, logy), full_output=1)
+    pfinal = out[0]
+    covar = out[1]
+    print("pfinal:", pfinal)
+    print("covar:", covar)
+    index = pfinal[1]
+    amp = 10.0**pfinal[0]
+    indexErr = np.sqrt( covar[0][0] )
+    ampErr = np.sqrt( covar[1][1] ) * amp
+    if log:
+        plt.semilogy(xdata, powerlaw(xdata, amp, index))
     else:
-        plt.plot([x for x in stat.keys()], [x for x in stat.values()])
-        plt.xlabel(xlbl)
-        plt.ylabel(ylbl)
-        plt.show()
+        plt.plot(xdata, powerlaw(xdata, amp, index))
+    
+    print('Ampli = %5.2f +/- %5.2f' % (amp, ampErr))
+    print('Index = %5.2f +/- %5.2f' % (index, indexErr))
 
-def plot_list(stat, xlbl, ylbl):
+def plot_dict(stat, xlbl, ylbl, doFit=False):
+    xdata = [x for x in stat.keys()]
+    ydata = [x for x in stat.values()]
+
+    if doFit:
+        fit_power_law(xdata,ydata)
+
+    plt.plot(xdata, ydata)
+    plt.xlabel(xlbl)
+    plt.ylabel(ylbl)
+    plt.show()
+
+def plot_list(stat, xlbl, ylbl, doFit=False):
+    xdata = [idx for idx, x in enumerate(stat)]
+    ydata = [x for x in stat]
+    
+    if doFit:
+        fit_power_law(xdata,ydata)
+    plt.plot(xdata, ydata)
+
     plt.plot(stat)
     plt.xlabel(xlbl)
     plt.ylabel(ylbl)
@@ -52,11 +77,9 @@ class CoauthorNetwork:
         self.author_to_article = {}
         self.gr = nx.Graph()
         self.cgr = nx.DiGraph()
-        self.bigr = nx.Graph()
         self.coauth_count = {}
         self.coauth_year = {}
         self.author_year = {}
-        self.author_article_year = {}
         self.auth_cited_by_year = {}
         self.cite_year = {}
         self.cite_count = {}
@@ -93,23 +116,14 @@ class CoauthorNetwork:
         nx.set_edge_attributes(self.cgr, 'times', self.cite_count)
         nx.write_gml(self.cgr, filename)
 
-    def write_gml_bigr(self, filename):
-        nx.set_edge_attributes(self.bigr, 'year', self.author_article_year)
-        nx.write_gml(self.bigr, filename)
-
 
 
     def create_cite_graph(self):
         for article_id, article in self.articles.items():
             #add all author of current article nodes
-            self.bigr.add_node(article.paper_index, bipartite=0, title=article.paper_title)
             for author in article.authors:
                 author = author.strip()
-                self.cgr.add_node(author)
-                self.bigr.add_node(author, bipartite=1)
-                self.bigr.add_edge(author, article.paper_index, year = article.year)
-                self.author_article_year[(author, article.paper_index)] = article.year
-
+                self.cgr.add_node(author)                
             for cited_article_id in article.references_ids:
                 cited_article = self.articles.get(cited_article_id)
                 if cited_article != None:
@@ -152,13 +166,6 @@ class CoauthorNetwork:
     def analize_component(self):
         the_component = self.components[0]
         self.component_subgraph = self.gr.subgraph(the_component)
-
-    def gaussian_fit(self):
-        gaussian = lambda x: 3*np.exp(-(30-x)**2/20.)
-
-        data = gaussian(np.arange(100))
-
-        
         
 
 
@@ -166,7 +173,7 @@ class CoauthorNetwork:
         PRECISION = 50 # number of authors to calc avg distance
         print(" ")
         print("Connected component distribution (log-scale)")
-        plot_dict(self.components_sizes, "rank", "size(log)")
+        plot_dict(self.components_sizes, "rank", "size(log)", doFit = True)
 
         print(power_divergence([len(c) for c in self.components]))
         print("Connected component count:", self.component_count)
@@ -178,13 +185,13 @@ class CoauthorNetwork:
         print("Mean distance:", sum([value * key for key, value in stat.items()]))
         print(" ")
         print("Distance distribution")
-        plot_dict(stat, "rank", "density", doGaussianFit=True)
+        plot_dict(stat, "rank", "density")
         
-        # cstat = get_centrality_stat(self.component_subgraph)
+        cstat = get_centrality_stat(self.component_subgraph)
         
-        # plot_list(cstat[0], "rank", "log node degree centrality")
-        # plot_list(cstat[1], "rank", "log node betweenness centrality")
-        # plot_list(cstat[2], "rank", "log node closeness centrality")
+        plot_list(cstat[0], "rank", "log node degree centrality", doFit=False)
+        plot_list(cstat[1], "rank", "log node betweenness centrality", doFit=False)
+        plot_list(cstat[2], "rank", "log node closeness centrality", doFit=False)
 
     def calc_coauthor_cite_distribution(self):
         coauthor_distribution = {}
