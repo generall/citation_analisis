@@ -5,7 +5,7 @@ iPython notebooks and tools citation and co-authorship analysis
 # Installation
 
 Dependences:
- - anaconda package: 
+ - anaconda package: https://www.continuum.io/downloads
  - Community detection package: https://pypi.python.org/pypi/python-louvain/0.3
  	- `pip3 install python-louvain`
 
