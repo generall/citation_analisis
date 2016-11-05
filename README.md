@@ -1,6 +1,7 @@
 # citation_analysis
 iPython notebooks and tools citation and co-authorship analysis
 
+Presenation with results: https://docs.google.com/presentation/d/1-rjhX4JgB94eDXsOjm7QxFtpktK8OpM4eX-mhCSNq4s/edit?usp=sharing
 
 # Installation
 
