@@ -53,7 +53,7 @@ class CoauthorNetwork:
             self.coauth_year[pair] = self.coauth_year.get(pair, []) + [article.year]
             self.gr.add_edge(pair[0], pair[1])
 
-    
+    # Export graphs in different formats:
     def get_articles_by_author(author):
         [self.articles.get(idx) for idx in author_to_article.get(author, [])]
     
@@ -70,6 +70,20 @@ class CoauthorNetwork:
     def write_gml_bigr(self, filename):
         # nx.set_edge_attributes(self.bigr, 'year', self.author_article_year)
         nx.write_gml(self.bigr, filename)
+
+    def write_net_gr(self,filename):
+        nx.set_edge_attributes(self.gr, 'year', self.coauth_year)
+        nx.set_edge_attributes(self.gr, 'times', self.coauth_count)
+        nx.write_pajek(self.gr, filename)
+
+    def write_net_cgr(self, filename):
+        nx.set_edge_attributes(self.cgr, 'year', self.cite_year)
+        nx.set_edge_attributes(self.cgr, 'times', self.cite_count)
+        nx.write_pajek(self.cgr, filename)
+
+    def write_net_bigr(self, filename):
+        # nx.set_edge_attributes(self.bigr, 'year', self.author_article_year)
+        nx.write_pajek(self.bigr, filename)
 
 
 
