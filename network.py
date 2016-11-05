@@ -25,9 +25,12 @@ class CoauthorNetwork:
         self.author_to_article = {}
         self.gr = nx.Graph()
         self.cgr = nx.DiGraph()
+        self.bigr = nx.Graph()
         self.coauth_count = {}
         self.coauth_year = {}
         self.author_year = {}
+        self.author_article_year = {}
+        self.author_article_title = {}
         self.auth_cited_by_year = {}
         self.cite_year = {}
         self.cite_count = {}
@@ -50,7 +53,7 @@ class CoauthorNetwork:
             self.coauth_year[pair] = self.coauth_year.get(pair, []) + [article.year]
             self.gr.add_edge(pair[0], pair[1])
 
-    
+    # Export graphs in different formats:
     def get_articles_by_author(author):
         [self.articles.get(idx) for idx in author_to_article.get(author, [])]
     
@@ -64,14 +67,35 @@ class CoauthorNetwork:
         nx.set_edge_attributes(self.cgr, 'times', self.cite_count)
         nx.write_gml(self.cgr, filename)
 
+    def write_gml_bigr(self, filename):
+        # nx.set_edge_attributes(self.bigr, 'year', self.author_article_year)
+        nx.write_gml(self.bigr, filename)
+
+    def write_net_gr(self,filename):
+        nx.set_edge_attributes(self.gr, 'year', self.coauth_year)
+        nx.set_edge_attributes(self.gr, 'times', self.coauth_count)
+        nx.write_pajek(self.gr, filename)
+
+    def write_net_cgr(self, filename):
+        nx.set_edge_attributes(self.cgr, 'year', self.cite_year)
+        nx.set_edge_attributes(self.cgr, 'times', self.cite_count)
+        nx.write_pajek(self.cgr, filename)
+
+    def write_net_bigr(self, filename):
+        # nx.set_edge_attributes(self.bigr, 'year', self.author_article_year)
+        nx.write_pajek(self.bigr, filename)
+
 
 
     def create_cite_graph(self):
         for article_id, article in self.articles.items():
+            self.bigr.add_node(article.paper_index, bipartite=0, title=article.paper_title)
             #add all author of current article nodes
             for author in article.authors:
                 author = author.strip()
-                self.cgr.add_node(author)                
+                self.cgr.add_node(author)
+                self.bigr.add_node(author, bipartite=1)
+                self.bigr.add_edge(author, article.paper_index, year = article.year)                
             for cited_article_id in article.references_ids:
                 cited_article = self.articles.get(cited_article_id)
                 if cited_article != None:
