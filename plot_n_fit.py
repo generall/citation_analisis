@@ -79,7 +79,7 @@ def plot_with_gaussion_fit(stat):
     data = [x[1] for x in stat]
     xdata = [x[0] for x in stat]
 
-    plt.plot(xdata, data, '-')
+    plt.plot(xdata, data, '-', label="Experiment")
 
     X = np.arange(len(data))
     x = np.sum(X*data)/np.sum(data)
@@ -89,5 +89,7 @@ def plot_with_gaussion_fit(stat):
 
     fit = lambda t : max_data*np.exp(-(t-x)**2/(2*width**2))
 
-    plt.plot(xdata, fit(X), '-')
+    plt.plot(xdata, fit(X), '-', label="Gaussian fit")
+    plt.legend(bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0.)
+    plt.show()
 
